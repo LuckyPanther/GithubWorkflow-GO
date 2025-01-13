@@ -1,20 +1,20 @@
-# Étape 1 : Utiliser une image officielle Go
+# Image Go de base
 FROM golang:1.20
 
-# Définir le répertoire de travail dans le conteneur
+# Création de l'utilisateur vscode et définition du répertoire de travail
+RUN useradd -m -s /bin/bash vscode \
+    && mkdir -p /workspace \
+    && chown vscode:vscode /workspace
+
 WORKDIR /workspace
 
-# Copier uniquement les fichiers de configuration nécessaires
-COPY go.mod go.sum ./
-
-# Télécharger les dépendances
-RUN go mod tidy
-
-# Copier tout le code source dans le conteneur
+# Copie des fichiers source dans le conteneur
 COPY . .
 
-# Compiler l'application et placer le binaire dans /usr/local/bin
-RUN go build -v -o /usr/local/bin/app ./...
+# Définition des droits pour l'utilisateur vscode
+USER vscode
 
-# Définir la commande par défaut pour démarrer le conteneur
-CMD ["/usr/local/bin/app"]
+# Commande par défaut pour exécuter l'application
+CMD ["go", "run", "main.go"]
+
+
