@@ -25,12 +25,15 @@
                 run: |
                   go mod init cowsay
                   go mod tidy
+
               - name: Build
                 run: go build -o -v ./
 
 
-
-        # deploy:
-        #     needs: build
-        #     runs-on: ubuntu-latest
-        #     steps:
+        deploy:
+            runs-on: ubuntu-latest
+            steps:
+                - name: Set up SSH key for deployment
+                  uses: webfactory/ssh-agent@v0.5.3
+                  with:
+                    ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
