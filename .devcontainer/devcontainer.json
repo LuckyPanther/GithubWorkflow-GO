@@ -1,0 +1,23 @@
+{
+    "name": "Go Development",
+    "dockerFile": "../Dockerfile",
+    "workspaceFolder": "/workspace",
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "ms-vscode.go",               // Extension Go pour VS Code
+          "golang.go-attachments"       // Extension pour les attachements Go
+        ],
+        "settings": {
+          "go.gopath": "/go",           // Définit le GOPATH dans le conteneur
+          "go.goroot": "/usr/local/go"  // Définit le chemin où Go est installé
+        }
+      }
+    },
+    "postCreateCommand": "go mod tidy", // Commande exécutée après la création du conteneur
+    "runArgs": [
+      "--user", "vscode"                // Exécuter avec l'utilisateur vscode
+    ]
+  }
+  
+  
