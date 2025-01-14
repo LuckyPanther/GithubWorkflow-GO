@@ -47,8 +47,6 @@
         needs: build
         steps:
           - uses: actions/download-artifact@v4
-        with:
-          path: /
-          name: compiled-binary
-    
-  
+            with:
+              path: /
+              name: compiled-binary
