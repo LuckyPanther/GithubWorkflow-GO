@@ -7,12 +7,12 @@
       push:
         branches:
           - main
-          # tags:
-          #   - 'v*'
+          tags:
+            - 'v*'
 
     env:
       REGISTRY: docker.io
-      IMAGE_NAME: luckysamurai/vachette
+      IMAGE_NAME: vachette
 
     jobs:
       build:
@@ -40,7 +40,6 @@
               password: ${{ secrets.DOCKERHUB_VACHETTE_TOKEN }}
           
           - name: Build and push
-            needs: Login to Docker Hub
             uses: docker/build-push-action@v6
             with:
               context: .
