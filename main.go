@@ -13,7 +13,9 @@ func main() {
 
 	// Génère le message cowsay
 	cow, err := cowsay.Say(
+
 		message	, // Le texte que la vache dira
+
 		cowsay.Type("default"), // Le type de vache (peut être changé, par ex. "dragon")
 	)
 	if err != nil {
