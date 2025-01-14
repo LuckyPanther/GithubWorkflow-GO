@@ -47,8 +47,8 @@
         needs: build
         steps:
           - name: Check downloaded artifact
-            run: ls -al ./file-bin
-            
+            run: ls -al ./
+
           - name: Download artifact 
             uses: actions/download-artifact@v4
             with:
