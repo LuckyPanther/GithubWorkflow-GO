@@ -1,5 +1,5 @@
 # Image Go
-FROM golang:1.20
+FROM golang:1.23.x AS gobuild
 
 # Création de l'utilisateur vscode et définition du répertoire de travail
 # -m crée un repertoire personnel pour l'utilisateur
@@ -8,6 +8,9 @@ FROM golang:1.20
 RUN useradd -m -s /bin/bash vscode \
     && mkdir -p /workspace \
     && chown vscode:vscode /workspace
+
+    # Initialisation du go.mod&go.sum
+RUN if [ -f go.mod ]; then rm go.mod; fi && go mod init cowsay && go mod tidy
 
 # Espace de travail dans le devconteneur ou toute les commande seront executées
 WORKDIR /workspace
