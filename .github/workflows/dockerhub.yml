@@ -5,10 +5,10 @@ name: try docker push image
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
-    # tags:
-    #   - 'v*'
+    # branches:
+    #   - main
+    tags:
+      - 'v*'
 
 env:
   REGISTRY: docker.io
