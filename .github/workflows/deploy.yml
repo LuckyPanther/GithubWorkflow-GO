@@ -39,14 +39,18 @@
             uses: actions/upload-artifact@v3
             with:
               name: compiled-binary
-              path: ./file-bin
+              path: ./
     
       # Déploiement du projet
       deploy:
         runs-on: self-hosted
         needs: build
         steps:
-          - uses: actions/download-artifact@v4
+          - name: Check downloaded artifact
+            run: ls -al ./file-bin
+            
+          - name: Download artifact 
+            uses: actions/download-artifact@v4
             with:
-              path: ./file-bin
+              path: ./
               name: compiled-binary
