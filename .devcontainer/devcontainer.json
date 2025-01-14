@@ -1,0 +1,16 @@
+{
+  "name": "Go Environnement",
+  "dockerFile": "../Dockerfile",
+  "workspaceFolder": "/workspace",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go"                                                 // extention offcielle pour autocompletion / linting / debugging / tests intégrées
+      ]
+    }
+  },
+  "postCreateCommand": "go mod init mymodule && go mod tidy",       // Commandes pour initialiser les modules Go / fichier go.mod et do sum
+  "remoteUser": "vscode"                                            // Utilisateur défini dans le Dockerfile
+}
+  
+  
