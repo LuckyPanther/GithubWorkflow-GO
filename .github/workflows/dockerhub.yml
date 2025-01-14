@@ -12,7 +12,7 @@
 
     env:
       REGISTRY: docker.io
-      IMAGE_NAME: vachette
+      IMAGE_NAME: vincbala/vachette
 
     jobs:
       build:
