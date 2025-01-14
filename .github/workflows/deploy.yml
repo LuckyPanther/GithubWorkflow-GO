@@ -67,12 +67,13 @@
             # Copie du fichier binaire vers le serveur distant
             - name: Copy binary to server
               run: |
-                scp -v -o StrictHostKeyChecking=no ./file-bin admin@145.223.34.251:~/deploy/
+                scp -v -o StrictHostKeyChecking=no ./file-bin ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:~/deploy/
+            
     
             # Exécution du fichier binaire sur le serveur
             - name: Execute the compiled binary on server
               run: |
-                ssh admin@145.223.34.251 "sudo chmod +x ~/deploy/file-bin && ~/deploy/file-bin"
+                ssh ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "sudo chmod +x ~/deploy/file-bin && ~/deploy/file-bin"
     
     
       # # Déploiement du projet
