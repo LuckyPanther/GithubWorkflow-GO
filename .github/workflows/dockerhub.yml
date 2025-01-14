@@ -19,12 +19,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      # - run: |
-      #     docker build -t aurelienbras/mavache:1 .
-      #     docker login -u aurelienbras -p $DOCKERHUB_TOKEN
-      #     docker push aurelienbras/mavache:1
-      #   env:
-      #     DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_AURELIEN_TOKEN }}
+
 
       - name: Docker meta
         id: meta
