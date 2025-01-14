@@ -39,7 +39,7 @@
             uses: actions/upload-artifact@v3
             with:
               name: compiled-binary
-              path: ./file-bin
+              path: /
     
       # Déploiement du projet
       deploy:
