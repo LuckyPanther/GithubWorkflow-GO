@@ -36,7 +36,7 @@
     
           # Téléchargement du fichier binaire en tant qu'artifact
           - name: Upload compiled binary
-            uses: actions/upload-artifact@v3
+            uses: actions/upload-artifact@v4
             with:
               name: compiled-binary
               path: ./
