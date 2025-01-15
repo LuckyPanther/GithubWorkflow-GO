@@ -1,54 +1,86 @@
 ---
-  
-    name: build & deploy
-    
-    on:
-      # Déclenchement de l'action lors d'un push sur la branche main ou par déclenchement manuel
-      workflow_dispatch:
-      push:
-        branches:
-          - main
-    
-    jobs:
-      # Compilation du projet
-      build:
-        runs-on: ubuntu-latest
-        steps:
-          # Récupération des fichiers
-          - name: Checkout repository
-            uses: actions/checkout@v4
-    
-          # Chargement de l'image Go
-          - name: Setup Go
-            uses: actions/setup-go@v5
-            with:
-              go-version: '1.23.x'
-    
-          # Installation des dépendances
-          - name: Install dependencies
-            run: |
-              [ -f go.mod ] || go mod init cowsay
-              go mod tidy
-    
-          # Compilation et nommage du fichier binaire
-          - name: Build
-            run: go build -o file-bin ./
-    
-          # Téléchargement du fichier binaire en tant qu'artifact
-          - name: Upload compiled binary
-            uses: actions/upload-artifact@v4
-            with:
-              name: compiled-binary
-              path: ./
-    
-      # Déploiement du projet
-      deploy:
-        runs-on: self-hosted
-        needs: build
-        steps:
+  # role : déployer automatiquement un fichier go executable et compilé 
+  # sur un serveur via un local runner (go marti)
 
-          - name: Download artifact 
-            uses: actions/download-artifact@v4
-            with:
-              # path: ./
-              name: compiled-binary
+  name: Build & deploy on server
+  
+  on:
+    # Déclenchement de l'action lors d'un push sur la branche main ou par déclenchement manuel
+    workflow_dispatch:
+    push:
+      branches:
+        - main
+  
+  jobs:
+    # Compilation du projet
+    build:
+      runs-on: ubuntu-latest
+      steps:
+        # Récupération des fichiers
+        - name: Checkout repository
+          uses: actions/checkout@v4
+  
+        # Chargement de l'image Go
+        - name: Setup Go
+          uses: actions/setup-go@v5
+          with:
+            go-version: '1.23.x'
+  
+        # Installation des dépendances si elle ne sont pas installées
+        - name: Install dependencies
+          run: |
+            [ -f go.mod ] || go mod init cowsay
+            go mod tidy
+  
+        # verifier et créer le dossier deploy
+        - name: Verify and create deploy directory
+          run: |
+            if [ ! -d "./deploy" ]; then
+              mkdir -p ./deploy
+            fi
+        
+        # Compilation et nommage du fichier binaire
+        - name: Build
+          run: go build -o deploy/file-bin ./
+  
+        # Téléchargement du fichier binaire en tant qu'artifact
+        - name: Upload compiled binary
+          uses: actions/upload-artifact@v4
+          with:
+            name: compiled-binary
+            # recuperation du fichier binaire
+            path: ./deploy/file-bin
+  
+        # Verifier la presence du fichier
+        - name: Verify upload artifact
+          run: |
+            ls -l ./deploy
+
+    # Déploiement du projet
+    deploy:
+      runs-on: self-hosted # local runner
+      needs: build
+      steps:
+        # Télécharge l'artefact et le place dans le répertoire courant
+        - name: Download artifact 
+          uses: actions/download-artifact@v4
+          with:
+            # 'path' définit où le fichier artefact est téléchargé sur la machine où l'action s'exécute.
+            path: ./
+            name: compiled-binary
+
+        # Verifier la presence du fichier
+        - name: Verify download artifact
+          run: |
+            ls -l ./
+      
+        # Déplacer l'artefact téléchargé à la racine du dossier utilisateur
+        - name: Deploy to target directory
+          run: |
+            mv ./file-bin ~/
+            chmod +x ~/file-bin
+        
+        # Verifier la presence du fichier
+        - name: Verify deployment
+          run: |
+            ls -l ~/
