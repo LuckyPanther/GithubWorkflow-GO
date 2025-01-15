@@ -18,3 +18,4 @@ RUN go build -o app .
 # Commande par défaut pour exécuter l'application
 CMD ["./app"]
 
+
