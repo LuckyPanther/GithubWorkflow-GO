@@ -1,43 +1,48 @@
 ---
 
-name: try docker push image
+  # role : déployer automatiquement une image docker (qui execute un fichier go compilé) 
+  # sur dockerhub et la mettre à jour toute les nuits
+
+name: Docker image on Dockerhub Tag
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:                                        
   push:
-    # branches:
-    #   - main
+    # déclanchement au push d'un nouveau tag
     tags:
-      - 'v*'
-
+      - 'v*'                                               
 env:
-  REGISTRY: docker.io
-  IMAGE_NAME: ${{ vars.DOCKERHUB_USERNAME }}/vachette
-
+  REGISTRY: docker.io                                      
+  IMAGE_NAME: ${{ vars.DOCKERHUB_USERNAME }}/vachette       # Le nom de l'image 
+    
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04                                   
+    
     steps:
+       # Étape pour vérifier/cloner le code source du dépôt GitHub
       - uses: actions/checkout@v4
 
-
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v5
+      # Récupère les métadonnées du Docker
+      - name: Docker meta                                   
+        id: meta                                            
+        uses: docker/metadata-action@v5                     
         with:
           images: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
+    
+      # Connexion à Docker Hub
+      - name: Login to Docker Hub  
+        uses: docker/login-action@v3  
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_VACHETTE_TOKEN }}
-      
-      - name: Build and push
-        uses: docker/build-push-action@v6
+          username: ${{ vars.DOCKERHUB_USERNAME }}  
+          password: ${{ secrets.DOCKERHUB_VACHETTE_TOKEN }} 
+    
+      # Construction et poussée de l'image Docker
+      - name: Build and push  
+        uses: docker/build-push-action@v6 
         with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          context: .                                            # tous le répertoire de travail
+          push: true                                            # pousser l'image construite vers Docker Hub
+          tags: ${{ steps.meta.outputs.tags }}                  
+          labels: ${{ steps.meta.outputs.labels }}              
