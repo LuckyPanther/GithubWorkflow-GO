@@ -58,7 +58,7 @@
 
     # Déploiement du projet
     deploy:
-      runs-on: go marti # local runner
+      runs-on: self-hosted # local runner
       needs: build
       steps:
         # Télécharge l'artefact et le place dans le répertoire courant
