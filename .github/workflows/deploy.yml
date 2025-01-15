@@ -1,99 +1,53 @@
 ---
-  
-    name: build & deploy
+
+  # role : déployer automatiquement une image docker (qui execute un fichier go compilé) 
+  # sur dockerhub et la mettre à jour toute les nuits
+
+name: try docker push image
+
+on:
+  workflow_dispatch:                                        
+  push:
+    # déclanchement au push d'un nouveau tag
+    tags:
+      - 'v*'                                               
+  schedule:
+    # Planification execution (toute les nuits à minuit)
+      - cron: '0 0 * * *'
+      # - cron: '*/2 * * * *' # toute les 2 minutes pour test
+
+env:
+  REGISTRY: docker.io                                      
+  IMAGE_NAME: ${{ vars.DOCKERHUB_USERNAME }}/vachette       # Le nom de l'image 
     
-    on:
-      # Déclenchement de l'action lors d'un push sur la branche main ou par déclenchement manuel
-      workflow_dispatch:
-      push:
-        branches:
-          - main
+jobs:
+  build:
+    runs-on: ubuntu-24.04                                   
     
-    jobs:
-      # Compilation du projet
-      build:
-        runs-on: ubuntu-latest
-        steps:
-          # Récupération des fichiers
-          - name: Checkout repository
-            uses: actions/checkout@v4
+    steps:
+       # Étape pour vérifier/cloner le code source du dépôt GitHub
+      - uses: actions/checkout@v4
+
+      # Récupère les métadonnées du Docker
+      - name: Docker meta                                   
+        id: meta                                            
+        uses: docker/metadata-action@v5                     
+        with:
+          images: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
     
-          # Chargement de l'image Go
-          - name: Setup Go
-            uses: actions/setup-go@v5
-            with:
-              go-version: '1.23.x'
+      # Connexion à Docker Hub
+      - name: Login to Docker Hub  
+        uses: docker/login-action@v3  
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}  
+          password: ${{ secrets.DOCKERHUB_VACHETTE_TOKEN }} 
     
-          # Installation des dépendances
-          - name: Install dependencies
-            run: |
-              [ -f go.mod ] || go mod init cowsay
-              go mod tidy
-    
-          # Compilation et nommage du fichier binaire
-          - name: Build
-            run: go build -o file-bin ./
-    
-          # Téléchargement du fichier binaire en tant qu'artifact
-          - name: Upload compiled binary
-            uses: actions/upload-artifact@v3
-            with:
-              name: compiled-binary
-              path: ./file-bin
-    
-      # Déploiement du projet
-      deploy:
-          runs-on: ubuntu-latest
-          needs: build
-          steps:
-            # Test de connexion SSH avec appleboy/ssh-action
-            - name: Test SSH connection using appleboy/ssh-action
-              uses: appleboy/ssh-action@v1.2.0
-              with:
-                host: ${{ secrets.REMOTE_HOST }}
-                username: ${{ secrets.REMOTE_USER }}
-                key: ${{ secrets.SSH_PRIVATE_KEY }}
-                script: |
-                 echo "Test de la connexion SSH au serveur"
-                 echo "Connexion réussie à $(hostname)"
-    
-            # Téléchargement de l'artifact (fichier binaire compilé)
-            - name: Download compiled binary
-              uses: actions/download-artifact@v3
-              with:
-                name: compiled-binary  # Correspond au nom de l'artifact téléchargé
-                path: ./  # Téléchargement dans le répertoire courant
-    
-            # Copie du fichier binaire vers le serveur distant
-            - name: Copy binary to server
-              run: |
-                scp -v -o StrictHostKeyChecking=no ./file-bin admin@145.223.34.251:~/deploy/
-    
-            # Exécution du fichier binaire sur le serveur
-            - name: Execute the compiled binary on server
-              run: |
-                ssh admin@145.223.34.251 "sudo chmod +x ~/deploy/file-bin && ~/deploy/file-bin"
-    
-    
-      # # Déploiement du projet
-      # deploy:
-      #   runs-on: ubuntu-latest
-      #   needs: build
-      #   steps:
-      #     # Téléchargement de l'artifact (fichier binaire compilé)
-      #     - name: Download compiled binary
-      #       uses: actions/download-artifact@v3
-      #       with:
-      #         name: compiled-binary  # Correspond au nom de l'artifact téléchargé
-      #         path: ./  # Téléchargement dans le répertoire courant
-    
-      #     # Test de connexion SSH avec appleboy/ssh-action
-      #     - name: Test SSH connection using appleboy/ssh-action
-      #       uses: appleboy/ssh-action@v1.2.0
-      #       with:
-      #         host: ${{ secrets.REMOTE_HOST }}
-      #         username: ${{ secrets.REMOTE_USER }}
-      #         key: ${{ secrets.SSH_PRIVATE_KEY }}
-      #         script: |
-      #           echo "Test de la connexion SSH au serveur"
-      #           echo "Connexion réussie à $(hostname)"
+      # Construction et poussée de l'image Docker
+      - name: Build and push  
+        uses: docker/build-push-action@v6 
+        with:
+          context: .                                            # tous le répertoire de travail
+          push: true                                            # pousser l'image construite vers Docker Hub
+          tags: ${{ steps.meta.outputs.tags }}                  
+          labels: ${{ steps.meta.outputs.labels }}              

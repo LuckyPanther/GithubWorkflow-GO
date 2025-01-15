@@ -1,24 +1,20 @@
-# Image Go
-FROM golang:1.20
+# Étape de construction de l'image Go
+FROM golang:1.23.1 AS gobuild
 
-# Création de l'utilisateur vscode et définition du répertoire de travail
-# -m crée un repertoire personnel pour l'utilisateur
-# -s definition de basch comme shell
-# attribut le repertoire à l utilisateur vscode
-RUN useradd -m -s /bin/bash vscode \
-    && mkdir -p /workspace \
-    && chown vscode:vscode /workspace
-
-# Espace de travail dans le devconteneur ou toute les commande seront executées
+# Définir le GOPATH et le répertoire de travail
+ENV GOPATH=/workspace/go
 WORKDIR /workspace
 
-# Copie de tous les fichiers du repertoire dans le devconteneur
+# Copier uniquement les fichiers sources
 COPY . .
 
-# Change l'utilisateur actif par vscode
-USER vscode
+# Initialiser les modules Go et installer les dépendances
+RUN go mod init cowsay && \
+    go mod tidy
+
+# Compiler le projet Go en désactivant VCS (a creuser pour mieux comprendre)
+RUN go build -o app .
 
 # Commande par défaut pour exécuter l'application
-CMD ["go", "run", "main.go"]
-
+CMD ["./app"]
 
